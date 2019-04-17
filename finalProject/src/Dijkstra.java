@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-class Solution {
+class Dijkstra {
 
   private static Scanner sc;
 
