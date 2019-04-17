@@ -33,4 +33,4 @@ Output the minimum cost to travel from S to D, or -1 if there is no path
 
 ### Notes
 1. Your solution should be effecient (it should run in O((N+M)logN)).
-2. Do not import, include, or use any additional libraries unless dealing with System inputs. (For Java, you can't use anything from java.util.\*, but you can use the Scanner)
+2. Do not import, include, or use any additional libraries unless dealing with System inputs. (For Java, you can't use anything from java.util.\* other than the Scanner)
