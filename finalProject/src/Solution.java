@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-public class Solution {
+class Solution {
 
   private static Scanner sc;
 
@@ -19,17 +19,23 @@ public class Solution {
 
 
     Node[][] adj = parseForAdjacencyLists(nvAdjusted, nEdges);
+    Node[][] adjSized = shrinkLists(adj);
+
+    print2dNode(adj);
+    System.out.println("***************************");
+    print2dNode(adjSized);
 
     int source = sc.nextInt();
     int dest = sc.nextInt();
 
     // Calculate the single source shortest path
     Dijkstra finder = new Dijkstra(nvAdjusted);
-    finder.dijkstra(adj, source);
+    finder.dijkstra(adjSized, source);
 
     System.out.println(finder.getDist()[dest]);
   }
 
+  //parse the scanner to generate the adjacency lists.
   private static Node[][] parseForAdjacencyLists(int nV, int nE) {
 
     Node[][] result = new Node[nV][nV];
@@ -60,6 +66,40 @@ public class Solution {
     }
 
     return result;
+  }
+
+  //Shrink the list to make it more optimal for dijkstra
+  private static Node[][] shrinkLists(Node[][] toShrink){
+    int deepestNonZero = -1;
+
+    for(int i = 0; i < toShrink.length; i++){
+      for(int j = 0; j < toShrink[i].length; j++){
+        if (toShrink[i][j].id != -1 && j > deepestNonZero){
+          deepestNonZero = j;
+        }
+      }
+    }
+
+    System.out.println("\n\n" + deepestNonZero + "\n");
+
+    Node[][] shrunk = new Node[toShrink.length][deepestNonZero + 1];
+    for (int i =0; i < shrunk.length; i++){
+      for(int j = 0; j < shrunk[i].length; j++){
+        shrunk[i][j] = toShrink[i][j];
+      }
+    }
+
+    return shrunk;
+  }
+
+  //print a 2D array of Nodes
+  private static void print2dNode(Node[][] toPrint){
+    for(Node[] nL : toPrint){
+      for(Node n : nL){
+        System.out.print(n.toString() + ",");
+      }
+      System.out.println();
+    }
   }
 
 }
