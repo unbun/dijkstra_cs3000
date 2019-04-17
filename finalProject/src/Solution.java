@@ -1,65 +1,74 @@
 import java.util.Scanner;
 
-public class Solution {
+class Solution {
 
   private static Scanner sc;
 
   public static void main(String args[]) {
+    Parser build = new Parser();
 
-    sc = new Scanner(System.in);
+//    build.generateDummy(2, 1);
+    build.generate();
 
-    int nVertices = sc.nextInt();
-    int nEdges = sc.nextInt();
-
-    // adjust the vertices because I made Dijkstra use zero-indexed vertices, and the input will be
-    // one-indexed. This could be easily solved by simply using HashMaps instead, but because I
-    // can't this is essentially a trade of memory for time, where we lose memory for an adjacency
-    // list for a Node 0, but the arrays will operate faster.
-    int nvAdjusted = nVertices + 1;
-
-
-    Node[][] adj = parseForAdjacencyLists(nvAdjusted, nEdges);
-
-    int source = sc.nextInt();
-    int dest = sc.nextInt();
-
-    // Calculate the single source shortest path
-    Dijkstra finder = new Dijkstra(nvAdjusted);
-    finder.dijkstra(adj, source);
-
-    System.out.println(finder.getDist()[dest]);
+    int minCost = dijkstra(build.getGraph(), build.getSource(), build.getDest());
+    System.out.println(minCost);
   }
 
-  private static Node[][] parseForAdjacencyLists(int nV, int nE) {
+  // The main function that calculates distances of shortest paths from src to dest (really finds all
+  // vertices' distances, but only returns for the dest.
+  // It is a O(ELogV) function since we are using an adjacency list on Dijkstra
+  static int dijkstra(Graph graph, int src, int dest) {
+    int V = graph.nVerts;
+    int[] dist = new int[V];
 
-    Node[][] result = new Node[nV][nV];
-    for (int i = 0; i < nV; i++) {
-      for (int j = 0; j < nV; j++) {
-        result[i][j] = new NullNode();
+    // minHeap represents set edges
+    MinHeap minHeap = new MinHeap(V);
+
+    for (int v = 0; v < V; ++v) {
+      dist[v] = Integer.MAX_VALUE;
+      minHeap.heap[v] = new DVertex(v, dist[v]);
+      minHeap.pos[v] = v;
+    }
+
+    // Make dist value of src vertex as 0 so that it is extracted first 
+    minHeap.heap[src] = new DVertex(src, dist[src]);
+    minHeap.pos[src] = src;
+    dist[src] = 0;
+    minHeap.decreaseKey(src, dist[src]);
+
+    // Initially size of min heap is equal to nVerts
+    minHeap.size = V;
+
+
+    while (!minHeap.isEmpty()) {
+      DVertex DVertex = minHeap.extractMin();
+      int u = DVertex.v; // Store the extracted vertex number
+
+
+      ConsLinkedList crawl = graph.array[u].head;
+      while (crawl != null) {
+        int v = crawl.data;
+
+        if (minHeap.isInMinHeap(v) && dist[u] != Integer.MAX_VALUE && crawl.weight + dist[u] < dist[v]) {
+          dist[v] = dist[u] + crawl.weight;
+          minHeap.decreaseKey(v, dist[v]); // update distance value in min heap also
+        }
+
+        crawl = crawl.rest;
       }
     }
 
-    // stores which index we are at for each node's adjacency lists
-    int[] counterPerFroms = new int[nV];
-    for (int i = 0; i < nV; i++) {
-      counterPerFroms[i] = 0;
-    }
+    // print the calculated shortest distances
+    // printDistTable(dist, nVerts, src);
 
-    int argIdx = 2;
-
-    for (int i = 0; i < nE; i++) {
-      int from = sc.nextInt();
-      int to = sc.nextInt();
-      int cost = sc.nextInt();
-
-      argIdx += 3;
-
-      int fromIdx = counterPerFroms[from];
-      result[from][fromIdx] = new Node(to, cost);
-      counterPerFroms[from]++;
-    }
-
-    return result;
+    return (dist[dest] == Integer.MAX_VALUE) ? -1 : dist[dest];
   }
 
+
+  static void printDistTable(int dist[], int n, int s) {
+    System.out.println("Vertex Distances from Source '" + s + "'");
+    for (int i = 0; i < n; ++i) {
+      System.out.println(String.format("%d\t\t%d", i, dist[i]));
+    }
+  }
 }
